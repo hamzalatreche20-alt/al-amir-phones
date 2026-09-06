@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-
+import { storeConfig } from '../../store.config';
 export default function AdminLayout({
   children,
 }: {

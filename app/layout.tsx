@@ -1,8 +1,8 @@
 'use client';
-import type { Metadata } from 'next';
 import './globals.css';
 import Link from 'next/link';
 import { useState } from 'react';
+import { storeConfig } from '../store.config'; // 👈 استيراد ملف الإعدادات
 
 export default function RootLayout({
   children,
@@ -15,7 +15,7 @@ export default function RootLayout({
     <html lang="ar" dir="rtl" className="scroll-smooth">
       <body className="flex flex-col min-h-screen">
         
-        {/* Navigation Bar */}
+        {/* ================= Header ================= */}
         <header className="bg-brand-black text-white sticky top-0 z-50 shadow-md">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             
@@ -30,11 +30,11 @@ export default function RootLayout({
             </div>
 
             <Link href="/" className="flex flex-col">
-              <span className="text-xl md:text-2xl font-bold text-brand-gold">محل الأمير</span>
-              <span className="text-xs text-gray-300">لبيع الهواتف بالتقسيط</span>
+              {/* 👈 استخدام اسم وشعار المتجر من الإعدادات */}
+              <span className="text-xl md:text-2xl font-bold text-brand-gold">{storeConfig.name}</span>
+              <span className="text-xs text-gray-300">{storeConfig.slogan}</span>
             </Link>
             
-            {/* روابط الحواسيب الشاشات الكبيرة */}
             <nav className="hidden md:flex gap-6 text-sm font-medium items-center">
               <Link href="/" className="hover:text-brand-gold transition">الرئيسية</Link>
               <Link href="#phones" className="hover:text-brand-gold transition">الهواتف</Link>
@@ -49,7 +49,7 @@ export default function RootLayout({
           </div>
         </header>
 
-        {/* خلفية مظلمة عند فتح القائمة في الهاتف */}
+        {/* ================= Mobile Menu ================= */}
         {mobileMenuOpen && (
           <div 
             onClick={() => setMobileMenuOpen(false)}
@@ -57,7 +57,6 @@ export default function RootLayout({
           ></div>
         )}
 
-        {/* قائمة الجوال المنسدلة الجانبية */}
         <div className={`
           fixed top-0 bottom-0 right-0 z-50 w-72 bg-brand-black text-white p-6 flex flex-col justify-between shadow-2xl
           transform transition-transform duration-300 ease-in-out md:hidden
@@ -66,8 +65,8 @@ export default function RootLayout({
           <div>
             <div className="flex justify-between items-center mb-8 border-b border-gray-800 pb-4">
               <div>
-                <h2 className="text-xl font-bold text-brand-gold">محل الأمير</h2>
-                <p className="text-xs text-gray-400">لبيع الهواتف بالتقسيط والكاش</p>
+                <h2 className="text-xl font-bold text-brand-gold">{storeConfig.name}</h2>
+                <p className="text-xs text-gray-400">{storeConfig.slogan}</p>
               </div>
               <button 
                 onClick={() => setMobileMenuOpen(false)} 
@@ -78,55 +77,35 @@ export default function RootLayout({
             </div>
 
             <nav className="flex flex-col gap-4 text-base font-medium">
-              <Link 
-                href="/" 
-                onClick={() => setMobileMenuOpen(false)}
-                className="hover:text-brand-gold transition py-2 border-b border-gray-800/50 flex items-center gap-3"
-              >
+              <Link href="/" onClick={() => setMobileMenuOpen(false)} className="hover:text-brand-gold transition py-2 border-b border-gray-800/50 flex items-center gap-3">
                 <span>🏠</span> الرئيسية
               </Link>
-              <Link 
-                href="#phones" 
-                onClick={() => setMobileMenuOpen(false)}
-                className="hover:text-brand-gold transition py-2 border-b border-gray-800/50 flex items-center gap-3"
-              >
+              <Link href="#phones" onClick={() => setMobileMenuOpen(false)} className="hover:text-brand-gold transition py-2 border-b border-gray-800/50 flex items-center gap-3">
                 <span>📱</span> الهواتف المتوفرة
               </Link>
-              <Link 
-                href="#calculator" 
-                onClick={() => setMobileMenuOpen(false)}
-                className="hover:text-brand-gold transition py-2 border-b border-gray-800/50 flex items-center gap-3"
-              >
+              <Link href="#calculator" onClick={() => setMobileMenuOpen(false)} className="hover:text-brand-gold transition py-2 border-b border-gray-800/50 flex items-center gap-3">
                 <span>🧮</span> حاسبة التقسيط
               </Link>
-              <Link 
-                href="#faq" 
-                onClick={() => setMobileMenuOpen(false)}
-                className="hover:text-brand-gold transition py-2 border-b border-gray-800/50 flex items-center gap-3"
-              >
+              <Link href="#faq" onClick={() => setMobileMenuOpen(false)} className="hover:text-brand-gold transition py-2 border-b border-gray-800/50 flex items-center gap-3">
                 <span>❓</span> الأسئلة الشائعة
               </Link>
-              <Link 
-                href="/store" 
-                onClick={() => setMobileMenuOpen(false)}
-                className="bg-brand-gold text-brand-black font-bold p-3 rounded-xl text-center shadow-md mt-2 flex items-center justify-center gap-2"
-              >
+              <Link href="/store" onClick={() => setMobileMenuOpen(false)} className="bg-brand-gold text-brand-black font-bold p-3 rounded-xl text-center shadow-md mt-2 flex items-center justify-center gap-2">
                 <span>💵</span> المتجر (كاش)
               </Link>
             </nav>
           </div>
 
           <div className="pt-6 border-t border-gray-800 text-center text-xs text-gray-500">
-            <p>محل الأمير © {new Date().getFullYear()}</p>
+            <p>{storeConfig.name} © {new Date().getFullYear()}</p>
           </div>
         </div>
 
-        {/* Main Content */}
+        {/* ================= Main Content ================= */}
         <main className="flex-grow">
           {children}
         </main>
 
-       {/* Footer الاحترافي */}
+       {/* ================= Footer ================= */}
         <footer className="bg-brand-black text-white pt-16 pb-8 border-t-4 border-brand-gold mt-auto">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
@@ -134,11 +113,11 @@ export default function RootLayout({
               {/* معلومات المتجر */}
               <div>
                 <Link href="/" className="flex flex-col mb-4">
-                  <span className="text-2xl font-bold text-brand-gold">محل الأمير</span>
-                  <span className="text-sm text-gray-400">لبيع الهواتف بالتقسيط</span>
+                  <span className="text-2xl font-bold text-brand-gold">{storeConfig.name}</span>
+                  <span className="text-sm text-gray-400">{storeConfig.slogan}</span>
                 </Link>
                 <p className="text-gray-400 text-sm leading-relaxed mb-4">
-                  وجهتك الأولى في الجزائر لامتلاك أحدث الهواتف الذكية بخطط دفع مرنة وميسرة تتناسب مع ميزانيتك. مصداقية، سرعة، وضمان.
+                  {storeConfig.description}
                 </p>
               </div>
 
@@ -164,17 +143,17 @@ export default function RootLayout({
                   <span className="absolute -bottom-1 right-0 w-1/2 h-1 bg-brand-gold rounded-full"></span>
                 </h3>
                 <ul className="space-y-3 text-gray-400 text-sm">
-                  <li className="flex items-center gap-2">
-                    <span>📍</span> العنوان: شارع ديدوش مراد، الجزائر العاصمة
+                  <li className="flex items-start gap-2">
+                    <span>📍</span> <span>العنوان: {storeConfig.address}</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <span>📞</span> الهاتف: <span dir="ltr">0555 00 00 00</span>
+                    <span>📞</span> الهاتف: <span dir="ltr">{storeConfig.phoneDisplay}</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <span>💬</span> واتساب: <span dir="ltr">0555 00 00 00</span>
+                    <span>💬</span> واتساب: <span dir="ltr">{storeConfig.phoneDisplay}</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <span>🕒</span> أوقات العمل: السبت - الخميس (9ص - 6م)
+                    <span>🕒</span> أوقات العمل: {storeConfig.workHours}
                   </li>
                 </ul>
               </div>
@@ -186,10 +165,10 @@ export default function RootLayout({
                   <span className="absolute -bottom-1 right-0 w-1/2 h-1 bg-brand-gold rounded-full"></span>
                 </h3>
                 <div className="flex gap-4">
-                  <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-blue-600 hover:text-white transition">
+                  <a href={storeConfig.facebookLink} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-blue-600 hover:text-white transition">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z"/></svg>
                   </a>
-                  <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-pink-600 hover:text-white transition">
+                  <a href={storeConfig.instagramLink} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-pink-600 hover:text-white transition">
                     <span className="font-bold text-sm">IG</span>
                   </a>
                 </div>
@@ -198,15 +177,15 @@ export default function RootLayout({
             </div>
             
             <div className="border-t border-gray-800 pt-6 text-center text-sm text-gray-500">
-              <p>© {new Date().getFullYear()} محل الأمير لبيع الهواتف بالتقسيط. جميع الحقوق محفوظة.</p>
+              <p>© {new Date().getFullYear()} {storeConfig.name}. جميع الحقوق محفوظة.</p>
               <p className="mt-2 text-xs">صُنع لتقديم أفضل تجربة تسوق في الجزائر 🇩🇿</p>
             </div>
           </div>
         </footer>
 
-        {/* Floating WhatsApp Button */}
+        {/* ================= Floating WhatsApp Button ================= */}
         <a 
-          href="https://wa.me/213000000000?text=السلام عليكم، أريد الاستفسار عن الهواتف المتوفرة بالتقسيط" 
+          href={`https://wa.me/${storeConfig.whatsappNumber}?text=السلام عليكم، أريد الاستفسار عن الهواتف المتوفرة`} 
           target="_blank" 
           rel="noopener noreferrer"
           className="fixed bottom-6 right-6 bg-green-500 text-white p-4 rounded-full shadow-xl hover:bg-green-600 transition hover:scale-110 z-50 flex items-center justify-center"
@@ -217,5 +196,5 @@ export default function RootLayout({
         </a>
       </body>
     </html>
-  )
+  );
 }

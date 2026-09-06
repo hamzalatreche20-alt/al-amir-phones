@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { supabase } from '@/utils/supabase';
+import { storeConfig } from '../store.config';
 // بيانات وهمية للهواتف
 
 
@@ -50,8 +51,8 @@ export default function Home() {
       <section className="bg-brand-light py-20">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-6xl font-extrabold text-brand-black mb-6">
-            أهلاً بك في <span className="text-brand-gold">محل الأمير</span>
-          </h1>
+  أهلاً بك في <span className="text-brand-gold">{storeConfig.name}</span>
+</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-10">
             اكتشف أحدث الهواتف الذكية بأسعار تنافسية. اختر طريقة الدفع التي تناسبك: الدفع نقداً عند الاستلام، أو التقسيط المريح حتى 12 شهراً!
           </p>
