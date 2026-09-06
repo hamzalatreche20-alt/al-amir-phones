@@ -1,17 +1,16 @@
-import type { Metadata } from 'next'
-import './globals.css'
-import Link from 'next/link'
-
-export const metadata: Metadata = {
-  title: 'محل الأمير لبيع الهواتف بالتقسيط',
-  description: 'أحدث الهواتف الذكية بأسعار مناسبة وخيارات تقسيط مرنة تناسب احتياجاتك.',
-}
+'use client';
+import type { Metadata } from 'next';
+import './globals.css';
+import Link from 'next/link';
+import { useState } from 'react';
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <html lang="ar" dir="rtl" className="scroll-smooth">
       <body className="flex flex-col min-h-screen">
@@ -19,25 +18,108 @@ export default function RootLayout({
         {/* Navigation Bar */}
         <header className="bg-brand-black text-white sticky top-0 z-50 shadow-md">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+            
+            {/* زر القائمة للهواتف */}
+            <div className="flex items-center gap-3 md:hidden">
+              <button 
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="text-2xl text-brand-gold focus:outline-none p-1"
+              >
+                {mobileMenuOpen ? '✕' : '☰'}
+              </button>
+            </div>
+
             <Link href="/" className="flex flex-col">
               <span className="text-xl md:text-2xl font-bold text-brand-gold">محل الأمير</span>
               <span className="text-xs text-gray-300">لبيع الهواتف بالتقسيط</span>
             </Link>
             
-            <nav className="hidden md:flex gap-6 text-sm font-medium">
+            {/* روابط الحواسيب الشاشات الكبيرة */}
+            <nav className="hidden md:flex gap-6 text-sm font-medium items-center">
               <Link href="/" className="hover:text-brand-gold transition">الرئيسية</Link>
               <Link href="#phones" className="hover:text-brand-gold transition">الهواتف</Link>
               <Link href="#calculator" className="hover:text-brand-gold transition">حاسبة التقسيط</Link>
               <Link href="#faq" className="hover:text-brand-gold transition">الأسئلة الشائعة</Link>
-            <Link href="/" className="font-bold text-brand-black hover:text-brand-gold">التقسيط</Link>
-  <Link href="/store" className="font-bold text-gray-600 hover:text-green-600">المتجر (كاش) 💵</Link>
+              <Link href="/store" className="font-bold text-brand-gold bg-gray-800 px-3 py-1.5 rounded-lg hover:bg-gray-700 transition">المتجر (كاش) 💵</Link>
             </nav>
 
-            <Link href="#phones" className="bg-brand-gold text-brand-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-yellow-500 transition">
+            <Link href="#phones" className="bg-brand-gold text-brand-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-yellow-500 transition hidden sm:inline-block">
               تصفح الهواتف
             </Link>
           </div>
         </header>
+
+        {/* خلفية مظلمة عند فتح القائمة في الهاتف */}
+        {mobileMenuOpen && (
+          <div 
+            onClick={() => setMobileMenuOpen(false)}
+            className="fixed inset-0 bg-black/60 z-40 md:hidden"
+          ></div>
+        )}
+
+        {/* قائمة الجوال المنسدلة الجانبية */}
+        <div className={`
+          fixed top-0 bottom-0 right-0 z-50 w-72 bg-brand-black text-white p-6 flex flex-col justify-between shadow-2xl
+          transform transition-transform duration-300 ease-in-out md:hidden
+          ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}
+        `}>
+          <div>
+            <div className="flex justify-between items-center mb-8 border-b border-gray-800 pb-4">
+              <div>
+                <h2 className="text-xl font-bold text-brand-gold">محل الأمير</h2>
+                <p className="text-xs text-gray-400">لبيع الهواتف بالتقسيط والكاش</p>
+              </div>
+              <button 
+                onClick={() => setMobileMenuOpen(false)} 
+                className="text-gray-400 hover:text-white text-2xl p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <nav className="flex flex-col gap-4 text-base font-medium">
+              <Link 
+                href="/" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="hover:text-brand-gold transition py-2 border-b border-gray-800/50 flex items-center gap-3"
+              >
+                <span>🏠</span> الرئيسية
+              </Link>
+              <Link 
+                href="#phones" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="hover:text-brand-gold transition py-2 border-b border-gray-800/50 flex items-center gap-3"
+              >
+                <span>📱</span> الهواتف المتوفرة
+              </Link>
+              <Link 
+                href="#calculator" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="hover:text-brand-gold transition py-2 border-b border-gray-800/50 flex items-center gap-3"
+              >
+                <span>🧮</span> حاسبة التقسيط
+              </Link>
+              <Link 
+                href="#faq" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="hover:text-brand-gold transition py-2 border-b border-gray-800/50 flex items-center gap-3"
+              >
+                <span>❓</span> الأسئلة الشائعة
+              </Link>
+              <Link 
+                href="/store" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="bg-brand-gold text-brand-black font-bold p-3 rounded-xl text-center shadow-md mt-2 flex items-center justify-center gap-2"
+              >
+                <span>💵</span> المتجر (كاش)
+              </Link>
+            </nav>
+          </div>
+
+          <div className="pt-6 border-t border-gray-800 text-center text-xs text-gray-500">
+            <p>محل الأمير © {new Date().getFullYear()}</p>
+          </div>
+        </div>
 
         {/* Main Content */}
         <main className="flex-grow">
@@ -104,11 +186,9 @@ export default function RootLayout({
                   <span className="absolute -bottom-1 right-0 w-1/2 h-1 bg-brand-gold rounded-full"></span>
                 </h3>
                 <div className="flex gap-4">
-                  {/* Facebook Icon */}
-                  <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-brand-blue hover:text-white transition">
+                  <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-blue-600 hover:text-white transition">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z"/></svg>
                   </a>
-                  {/* Instagram/TikTok Icon Placeholder */}
                   <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-pink-600 hover:text-white transition">
                     <span className="font-bold text-sm">IG</span>
                   </a>
@@ -123,6 +203,7 @@ export default function RootLayout({
             </div>
           </div>
         </footer>
+
         {/* Floating WhatsApp Button */}
         <a 
           href="https://wa.me/213000000000?text=السلام عليكم، أريد الاستفسار عن الهواتف المتوفرة بالتقسيط" 
