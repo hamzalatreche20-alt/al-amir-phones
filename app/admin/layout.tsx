@@ -1,42 +1,99 @@
 'use client';
+import { useState } from 'react';
 import Link from 'next/link';
-import { ReactNode } from 'react';
-import { logoutAdmin } from '../login/actions';
-import { useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
-export default function AdminLayout({ children }: { children: ReactNode }) {
-  const router = useRouter();
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname();
 
-  const handleLogout = async () => {
-    await logoutAdmin();
-    router.push('/login');
-  };
+  const navItems = [
+    { name: 'الإحصائيات', href: '/admin', icon: '📊' },
+    { name: 'إدارة الطلبات', href: '/admin/orders', icon: '📦' },
+    { name: 'إدارة المنتجات', href: '/admin/products', icon: '📱' },
+  ];
 
   return (
-    <div className="flex h-screen bg-gray-100" dir="rtl">
-      <aside className="w-64 bg-brand-black text-white flex flex-col">
-        <div className="p-6 text-center border-b border-gray-800">
-          <h2 className="text-2xl font-bold text-brand-gold">محل الأمير</h2>
-          <p className="text-xs text-gray-400 mt-1">لوحة تحكم الإدارة</p>
-        </div>
-        <nav className="flex-1 p-4 space-y-2">
-          <Link href="/admin" className="block p-3 rounded-lg hover:bg-gray-800 transition">📊 الإحصائيات</Link>
-          <Link href="/admin/orders" className="block p-3 rounded-lg hover:bg-gray-800 transition">📦 إدارة الطلبات</Link>
-          <Link href="/admin/products" className="block p-3 rounded-lg hover:bg-gray-800 transition">📱 إدارة المنتجات</Link>
-        </nav>
-        <div className="p-4 border-t border-gray-800 flex flex-col gap-2">
-          <button onClick={handleLogout} className="w-full text-center p-2 text-sm bg-red-900/50 text-red-400 rounded hover:bg-red-900 transition">
-            تسجيل الخروج 🚪
+    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row text-right" dir="rtl">
+      
+      {/* شريط علوي للهواتف فقط */}
+      <div className="md:hidden bg-brand-black text-white p-4 flex justify-between items-center shadow-md z-20">
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="text-2xl p-1 focus:outline-none"
+          >
+            {sidebarOpen ? '✕' : '☰'}
           </button>
-          <Link href="/" className="block text-center p-2 text-sm text-gray-400 hover:text-white transition">
-            العودة للمتجر 🌍
+          <span className="font-bold text-brand-gold">لوحة تحكم الأمير</span>
+        </div>
+        <Link href="/" className="text-xs bg-brand-gold text-brand-black px-3 py-1.5 rounded-lg font-bold">
+          المتجر ↗
+        </Link>
+      </div>
+
+      {/* خلفية معتمة عند فتح القائمة في الهاتف */}
+      {sidebarOpen && (
+        <div 
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+        ></div>
+      )}
+
+      {/* القائمة الجانبية (Sidebar) */}
+      <aside className={`
+        fixed md:static inset-y-0 right-0 z-40
+        w-64 bg-brand-black text-white p-6 flex flex-col justify-between shadow-xl
+        transform transition-transform duration-300 ease-in-out
+        ${sidebarOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
+      `}>
+        <div>
+          <div className="mb-8 hidden md:block">
+            <h2 className="text-2xl font-bold text-brand-gold">محل الأمير</h2>
+            <p className="text-xs text-gray-400 mt-1">لوحة تحكم الإدارة</p>
+          </div>
+
+          <nav className="space-y-2 mt-6 md:mt-0">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition ${
+                    isActive 
+                      ? 'bg-brand-gold text-brand-black shadow-lg' 
+                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                  }`}
+                >
+                  <span className="text-xl">{item.icon}</span>
+                  <span>{item.name}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+
+        <div className="pt-6 border-t border-gray-800 hidden md:block">
+          <Link 
+            href="/" 
+            className="block text-center w-full bg-brand-gold text-brand-black py-3 rounded-xl font-bold hover:bg-yellow-500 transition"
+          >
+            الذهاب للمتجر ↗
           </Link>
         </div>
       </aside>
 
-      <main className="flex-1 p-8 overflow-y-auto">
+      {/* محتوى الصفحة الرئيسي */}
+      <main className="flex-1 p-4 md:p-8 overflow-x-hidden">
         {children}
       </main>
+
     </div>
   );
 }
