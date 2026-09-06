@@ -15,6 +15,7 @@ export default function AdminLayout({
     { name: 'الإحصائيات', href: '/admin', icon: '📊' },
     { name: 'إدارة الطلبات', href: '/admin/orders', icon: '📦' },
     { name: 'إدارة المنتجات', href: '/admin/products', icon: '📱' },
+    { name: 'الإعدادات', href: '/admin/settings', icon: '⚙️' },
   ];
 
   return (
