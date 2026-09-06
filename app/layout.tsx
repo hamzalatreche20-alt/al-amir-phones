@@ -37,7 +37,9 @@ export default function RootLayout({
             
             <nav className="hidden md:flex gap-6 text-sm font-medium items-center">
               <Link href="/" className="hover:text-brand-gold transition">الرئيسية</Link>
-              <Link href="#phones" className="hover:text-brand-gold transition">الهواتف</Link>
+             <Link href="/installment" className="hover:text-brand-gold transition py-2 border-b border-gray-800/50 flex items-center gap-3">
+  <span>💳</span> متجر التقسيط
+</Link>
               <Link href="#calculator" className="hover:text-brand-gold transition">حاسبة التقسيط</Link>
               <Link href="#faq" className="hover:text-brand-gold transition">الأسئلة الشائعة</Link>
               <Link href="/store" className="font-bold text-brand-gold bg-gray-800 px-3 py-1.5 rounded-lg hover:bg-gray-700 transition">المتجر (كاش) 💵</Link>
