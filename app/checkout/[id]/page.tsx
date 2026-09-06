@@ -1,40 +1,92 @@
 'use client';
-import { useState, use } from "react"; // تأكد من استيراد use
+import { useState, useEffect, use } from "react"; 
 import Link from "next/link";
 import Image from "next/image";
 import { supabase } from '@/utils/supabase';
-// بيانات وهمية 
-const samplePhones = [
-  { id: "1", name: "Samsung Galaxy S24 Ultra", price: 245000, min_down_payment: 73500, image: "https://images.unsplash.com/photo-1707227251642-129eb884a22b?w=200&q=80" },
-  { id: "2", name: "iPhone 15 Pro Max", price: 285000, min_down_payment: 85500, image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=200&q=80" },
-];
 
-const wilayas = ["الجزائر", "وهران", "قسنطينة", "عنابة", "سطيف", "باتنة", "البليدة", "الشلف"];
+// تم إزالة الهواتف الوهمية بالكامل!
+const wilayas = ["الجزائر", "وهران", "قسنطينة", "عنابة", "سطيف", "باتنة", "البليدة", "الشلف", "النعامة", "أخرى"];
 
-// التعديل هنا: تعريف params كـ Promise
 export default function Checkout({ params }: { params: Promise<{ id: string }> }) {
-  
-  // التعديل هنا: فك تشفير params باستخدام use()
   const { id } = use(params);
   
-  // استخدام id المستخرج للبحث عن الهاتف
-  const product = samplePhones.find((p) => p.id === id) || samplePhones[0];
-  
+  // حالات تخزين بيانات الهاتف الحقيقية والإعدادات
+  const [product, setProduct] = useState<any>(null);
+  const [minPercent, setMinPercent] = useState<number>(30);
+  const [maxMonths, setMaxMonths] = useState<number>(12);
+  const [loading, setLoading] = useState(true);
+
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: "", phone: "", wilaya: "الجزائر", downPayment: product.min_down_payment, months: 6
+    fullName: "", phone: "", wilaya: "الجزائر", downPayment: 0, months: 6
   });
 
-  const remainingAmount = product.price - formData.downPayment;
-  const monthlyInstallment = Math.ceil(remainingAmount / formData.months);
+  // جلب بيانات الهاتف الحقيقي وإعدادات المتجر من قاعدة البيانات
+  useEffect(() => {
+    const fetchCheckoutData = async () => {
+      // 1. جلب إعدادات التقسيط (النسبة والأشهر)
+      let currentPercent = 30;
+      let currentMaxMonths = 12;
+
+      const { data: settingsData } = await supabase
+        .from('store_settings')
+        .select('*')
+        .eq('id', 1)
+        .single();
+      
+      if (settingsData) {
+        currentPercent = settingsData.down_payment_percent;
+        currentMaxMonths = settingsData.max_installment_months;
+        setMinPercent(currentPercent);
+        setMaxMonths(currentMaxMonths);
+      }
+
+      // 2. جلب تفاصيل الهاتف المحدد بالـ id
+      const { data: phoneData } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (phoneData) {
+        setProduct(phoneData);
+        // تحديث الدفعة الأولى الافتراضية بناءً على نسبة المحل المحددة في الداشبورد
+        const initialDownPayment = (phoneData.price * currentPercent) / 100;
+        setFormData(prev => ({ 
+          ...prev, 
+          downPayment: initialDownPayment,
+          // إذا كانت الأشهر الافتراضية (6) أكبر من الحد الأقصى للمحل، نغيرها
+          months: Math.min(6, currentMaxMonths)
+        }));
+      }
+      
+      setLoading(false);
+    };
+
+    fetchCheckoutData();
+  }, [id]);
+
+  // حساب الأقساط
+  const remainingAmount = product ? (product.price - formData.downPayment) : 0;
+  const monthlyInstallment = remainingAmount > 0 ? Math.ceil(remainingAmount / formData.months) : 0;
+  const actualMinDownPayment = product ? ((product.price * minPercent) / 100) : 0;
+
+  // توليد خيارات الأشهر ديناميكياً 
+  const monthOptions = [];
+  for (let i = 3; i <= maxMonths; i += 3) {
+    monthOptions.push(i);
+  }
+  if (!monthOptions.includes(maxMonths)) monthOptions.push(maxMonths);
+  monthOptions.sort((a,b) => a - b);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!product) return;
     
-    // 👈 إرسال الطلب إلى جدول orders
+    // إرسال الطلب إلى جدول orders
     const { error } = await supabase.from('orders').insert([
       {
-        product_id: id,
+        product_id: product.id,
         customer_name: formData.fullName,
         phone: formData.phone,
         wilaya: formData.wilaya,
@@ -47,9 +99,22 @@ export default function Checkout({ params }: { params: Promise<{ id: string }> }
     if (error) {
       alert("حدث خطأ أثناء الإرسال: " + error.message);
     } else {
-      setIsSubmitted(true); // إظهار رسالة النجاح
+      setIsSubmitted(true);
     }
   };
+
+  if (loading) {
+    return <div className="min-h-[60vh] flex items-center justify-center font-bold text-lg">جاري تجهيز طلبك... ⏳</div>;
+  }
+
+  if (!product && !loading) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center">
+        <h1 className="text-2xl font-bold text-red-500 mb-4">عذراً، لم نتمكن من العثور على هذا الهاتف.</h1>
+        <Link href="/#phones" className="bg-brand-black text-white px-6 py-2 rounded-lg">العودة لتصفح الهواتف</Link>
+      </div>
+    );
+  }
 
   if (isSubmitted) {
     return (
@@ -124,16 +189,26 @@ export default function Checkout({ params }: { params: Promise<{ id: string }> }
             <div className="grid md:grid-cols-2 gap-6 bg-brand-light p-4 rounded-xl border border-gray-200">
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">تعديل الدفعة الأولى (دج)</label>
-                <input type="number" min={product.min_down_payment} max={product.price} value={formData.downPayment} onChange={(e) => setFormData({...formData, downPayment: Number(e.target.value)})} className="w-full border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-brand-gold" />
-                <p className="text-xs text-gray-500 mt-1">الحد الأدنى: {product.min_down_payment.toLocaleString()} دج</p>
+                <input 
+                  type="number" 
+                  min={actualMinDownPayment} 
+                  max={product.price} 
+                  value={formData.downPayment} 
+                  onChange={(e) => setFormData({...formData, downPayment: Number(e.target.value)})} 
+                  className="w-full border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-brand-gold" 
+                />
+                <p className="text-xs text-gray-500 mt-1">الحد الأدنى ({minPercent}%): {actualMinDownPayment.toLocaleString()} دج</p>
               </div>
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">تعديل مدة التقسيط</label>
-                <select value={formData.months} onChange={(e) => setFormData({...formData, months: Number(e.target.value)})} className="w-full border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-brand-gold bg-white">
-                  <option value={3}>3 أشهر</option>
-                  <option value={6}>6 أشهر</option>
-                  <option value={9}>9 أشهر</option>
-                  <option value={12}>12 شهراً</option>
+                <select 
+                  value={formData.months} 
+                  onChange={(e) => setFormData({...formData, months: Number(e.target.value)})} 
+                  className="w-full border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-brand-gold bg-white"
+                >
+                  {monthOptions.map(m => (
+                    <option key={m} value={m}>{m} أشهر</option>
+                  ))}
                 </select>
               </div>
             </div>
